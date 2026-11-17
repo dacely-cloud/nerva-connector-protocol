@@ -1,0 +1,35 @@
+{
+    "name": "nerva-connector-protocol",
+    "version": "0.1.0",
+    "description": "Wire protocol shared by Nerva Connector and the Nerva backend: device identity, enrollment, file, execution, interactive and workspace messages, their codecs and signed transcripts",
+    "type": "module",
+    "license": "UNLICENSED",
+    "sideEffects": false,
+    "engines": {
+        "node": ">=22"
+    },
+    "files": [
+        "dist",
+        "LICENSE",
+        "README.md"
+    ],
+    "exports": {
+        "./*.js": {
+            "types": "./dist/*.d.ts",
+            "default": "./dist/*.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json",
+        "typecheck": "tsc -p tsconfig.json",
+        "check": "npm run typecheck && npm run build && git diff --exit-code -- dist"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dacely-cloud/nerva-connector-protocol.git"
+    },
+    "devDependencies": {
+        "@types/node": "26.6.5",
+        "typescript": "7.0.2"
+    }
+}

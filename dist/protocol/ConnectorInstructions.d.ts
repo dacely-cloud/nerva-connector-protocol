@@ -1,0 +1,16 @@
+/** Account-owned connector guidance never grants filesystem, execution or device authority. */
+export interface ConnectorInstructionsView {
+    readonly enrollmentId: string;
+    readonly instructions: string;
+    readonly revision: bigint;
+}
+/** An optimistic update preserves the caller's observed settings revision. Empty text clears guidance. */
+export interface ConnectorInstructionsUpdate {
+    readonly instructions: string;
+    readonly expectedRevision: bigint;
+}
+/** The instruction bound applies to UTF-8 bytes before persistence or prompt construction. */
+export declare class ConnectorInstructionsLimits {
+    /** Sixteen KiB accommodates connector-specific workflows while bounding account responses. */
+    static readonly bytes: number;
+}
