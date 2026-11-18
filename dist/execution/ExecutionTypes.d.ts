@@ -1,0 +1,47 @@
+/** Execution authority is distinct from a file-read grant; this controls persistent workspace mutation. */
+export declare enum ExecutionWorkspaceAccess {
+    ReadOnly = "read-only",
+    ReadWrite = "read-write"
+}
+/** Aggregate controls apply outside the namespace to every descendant, including forked background processes. */
+export interface ExecutionResourceLimits {
+    readonly memoryBytes: bigint;
+    readonly maximumTasks: number;
+    readonly cpuQuotaMicros: number;
+}
+/** A closed connection or interrupted process is never treated as a successful completed command. */
+export declare enum ExecutionTermination {
+    Exited = "exited",
+    Indeterminate = "indeterminate"
+}
+/** Causes describe local observation only; an indeterminate command may already have changed its granted workspace. */
+export declare enum ExecutionFailure {
+    Sandbox = "sandbox",
+    Cancelled = "cancelled",
+    Timeout = "timeout",
+    OutputLimit = "output-limit",
+    Signal = "signal",
+    AmbiguousExit = "ambiguous-exit",
+    Interrupted = "interrupted",
+    Expired = "expired"
+}
+/** Bounded local results remain unsigned until the separately authorized durable remote operation owner admits them. */
+export interface ExecutionResult {
+    readonly setupFailure: ExecutionSetupFailure | null;
+    readonly termination: ExecutionTermination;
+    readonly failure: ExecutionFailure | null;
+    readonly exitCode: number | null;
+    readonly stdoutBase64: string;
+    readonly stderrBase64: string;
+}
+/** Native pre-execution stages expose no OS message, host path or credential. */
+export declare enum ExecutionSetupFailure {
+    Bootstrap = "bootstrap",
+    Configuration = "configuration",
+    Namespaces = "namespaces",
+    Cgroup = "cgroup",
+    Mounts = "mounts",
+    AppArmor = "apparmor",
+    Confinement = "confinement",
+    Execute = "execute"
+}

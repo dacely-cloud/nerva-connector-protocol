@@ -1,0 +1,185 @@
+// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-License-Identifier: LicenseRef-Proprietary
+
+import { Boundary } from '../protocol/Boundary.js';
+import { ExecutionMachineBoundary } from './ExecutionMachineBoundary.js';
+import { ExecutionMachineRuleCodec } from './ExecutionMachineRuleCodec.js';
+import { ExecutionInteractiveRuleCodec } from './ExecutionInteractiveRuleCodec.js';
+import {
+    type ExecutionArgumentRule,
+    type ExecutionArgumentPolicy,
+    type ExecutionInvocation,
+} from './ExecutionPolicyTypes.js';
+import { ExecutionArgumentKind } from './ExecutionArgumentKind.js';
+
+/** Pure finite input grammar is enforced independently by account admission and the local execution owner. */
+export class ExecutionInputCodec {
+    /** Variable arguments are validated independently of a program's interpretation and never shell-joined. */
+    public static invocation(raw: unknown): ExecutionInvocation {
+        const value: Readonly<Record<string, unknown>> = Boundary.record(raw, [
+            'policySha256',
+            'programId',
+            'rootId',
+            'arguments',
+        ]);
+        const args: readonly string[] = ExecutionMachineBoundary.array(value['arguments'], 32).map(
+            (arg: unknown): string => this.#argument(arg),
+        );
+        if (
+            args.reduce(
+                (size: number, arg: string): number => size + ExecutionMachineBoundary.bytes(arg),
+                0,
+            ) > 8192
+        ) {
+            throw new Error('Execution arguments exceed their byte limit');
+        }
+        return {
+            policySha256: this.digest(value['policySha256']),
+            programId: Boundary.id(value['programId']),
+            rootId: Boundary.id(value['rootId']),
+            arguments: args,
+        };
+    }
+
+    /** Fixed positions are inserted locally; variable input cannot add switches, trailing arguments or environment values. */
+    public static arguments(
+        program: ExecutionArgumentPolicy,
+        input: readonly string[],
+    ): readonly string[] {
+        let index: number = 0;
+        const args: readonly string[] = program.arguments.map(
+            (rule: ExecutionArgumentRule): string => {
+                if (
+                    rule.kind === ExecutionArgumentKind.MachineInvocation ||
+                    rule.kind === ExecutionArgumentKind.InteractiveInvocation
+                ) {
+                    throw new Error(
+                        'Structured invocation requires its typed native plan resolver',
+                    );
+                }
+                if (rule.kind === ExecutionArgumentKind.Literal) {
+                    return rule.value;
+                }
+                const value: string | undefined = input[index++];
+                if (
+                    value === undefined ||
+                    (rule.kind === ExecutionArgumentKind.Choice
+                        ? !rule.values.includes(value)
+                        : ExecutionMachineBoundary.bytes(value) > rule.maximumBytes)
+                ) {
+                    throw new Error('Execution argument denied by local policy');
+                }
+                if (
+                    rule.kind === ExecutionArgumentKind.RelativePath &&
+                    (value.length === 0 ||
+                        value.startsWith('-') ||
+                        value.startsWith('/') ||
+                        value
+                            .split('/')
+                            .some(
+                                (part: string): boolean =>
+                                    part === '' || part === '.' || part === '..',
+                            ) ||
+                        Array.from(value).some(
+                            (character: string): boolean =>
+                                character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127,
+                        ))
+                ) {
+                    throw new Error('Execution relative path denied');
+                }
+                return value;
+            },
+        );
+        if (
+            index !== input.length ||
+            args.reduce(
+                (size: number, arg: string): number => size + ExecutionMachineBoundary.bytes(arg),
+                0,
+            ) > 8192
+        ) {
+            throw new Error('Execution argument shape changed');
+        }
+        return args;
+    }
+
+    /** Digests authenticate locally reviewed bytes only when the policy itself came from trusted installation. */
+    public static digest(raw: unknown): string {
+        if (typeof raw !== 'string' || !/^[a-f0-9]{64}$/u.test(raw)) {
+            throw new Error('Explicit executable digest required');
+        }
+        return raw;
+    }
+    static #argument(raw: unknown): string {
+        if (
+            typeof raw !== 'string' ||
+            !raw.isWellFormed() ||
+            raw.includes('\0') ||
+            ExecutionMachineBoundary.bytes(raw) > 4096
+        ) {
+            throw new Error('Invalid bounded execution argument');
+        }
+        return raw;
+    }
+    /** The same strict argument grammar governs local policy and published variable-position grants. */
+    public static argumentRule(raw: unknown): ExecutionArgumentRule {
+        const descriptor: PropertyDescriptor | undefined =
+            typeof raw === 'object' && raw !== null
+                ? Object.getOwnPropertyDescriptor(raw, 'kind')
+                : undefined;
+        if (
+            descriptor === undefined ||
+            descriptor.enumerable !== true ||
+            !Object.hasOwn(descriptor, 'value')
+        ) {
+            throw new Error('Explicit execution argument kind data required');
+        }
+        const kind: unknown = descriptor.value;
+        if (kind === ExecutionArgumentKind.MachineInvocation) {
+            return ExecutionMachineRuleCodec.read(raw);
+        }
+        if (kind === ExecutionArgumentKind.InteractiveInvocation) {
+            return ExecutionInteractiveRuleCodec.read(raw);
+        }
+        let fields: readonly string[];
+        if (kind === ExecutionArgumentKind.Literal) {
+            fields = ['kind', 'value'];
+        } else if (kind === ExecutionArgumentKind.Choice) {
+            fields = ['kind', 'values'];
+        } else if (
+            kind === ExecutionArgumentKind.Text ||
+            kind === ExecutionArgumentKind.RelativePath
+        ) {
+            fields = ['kind', 'maximumBytes'];
+        } else {
+            throw new Error('Unsupported execution argument rule');
+        }
+        const value: Readonly<Record<string, unknown>> = ExecutionMachineBoundary.record(
+            raw,
+            fields,
+        );
+        if (value['kind'] === ExecutionArgumentKind.Literal) {
+            return { kind: ExecutionArgumentKind.Literal, value: this.#argument(value['value']) };
+        }
+        if (value['kind'] === ExecutionArgumentKind.Choice) {
+            const values: readonly string[] = ExecutionMachineBoundary.array(
+                value['values'],
+                16,
+            ).map((arg: unknown): string => this.#argument(arg));
+            if (values.length === 0 || new Set(values).size !== values.length) {
+                throw new Error('Explicit unique argument choices required');
+            }
+            return { kind: ExecutionArgumentKind.Choice, values };
+        }
+        if (
+            value['kind'] === ExecutionArgumentKind.Text ||
+            value['kind'] === ExecutionArgumentKind.RelativePath
+        ) {
+            const maximumBytes: number = Boundary.count(value['maximumBytes'], 4096);
+            if (maximumBytes === 0) {
+                throw new Error('Positive argument byte limit required');
+            }
+            return { kind: value['kind'], maximumBytes };
+        }
+        throw new Error('Unsupported execution argument rule');
+    }
+}
