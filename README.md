@@ -6,6 +6,8 @@ workspace publication, admission migration, host observation and system specific
 types, a strict codec and, where it is signed, its canonical transcript.
 
 Both sides import the same modules, so a message one side signs is the exact message the other side verifies.
+Signed proofs take the signing key and the verifier from the caller through `identity/PurposeSignature.js`, so each
+side keeps its own key implementation while the payload bytes come from one shared transcript.
 
 ## Use
 
@@ -26,8 +28,12 @@ build step:
 
 ```sh
 npm ci
-npm run check   # typecheck, rebuild dist/ and fail if the committed dist/ is out of date
+npm run check   # typecheck, rebuild dist/, fail if the committed dist/ is out of date, then run the golden tests
 ```
+
+`test/golden/ConnectorTestCases.json` holds calls captured from the Nerva Connector test suite. Each case pins the
+digest of the result that Nerva Connector and the Nerva backend both produced before these modules were shared, so a
+change to any shared transcript or decoder output fails `npm test`.
 
 Change the protocol here, run `npm run check`, commit `src/` and `dist/` together, then move both consumers to the
 new commit in the same change.

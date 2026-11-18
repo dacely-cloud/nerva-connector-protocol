@@ -22,7 +22,8 @@
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
         "typecheck": "tsc -p tsconfig.json",
-        "check": "npm run typecheck && npm run build && git diff --exit-code -- dist"
+        "test": "node --test test/Golden.test.ts",
+        "check": "npm run typecheck && npm run build && git diff --exit-code -- dist && npm test"
     },
     "repository": {
         "type": "git",
