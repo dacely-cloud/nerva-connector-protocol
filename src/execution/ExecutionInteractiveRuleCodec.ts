@@ -31,11 +31,11 @@ export class ExecutionInteractiveRuleCodec {
     }
 
     /** A complete interactive grant cannot coexist with foreground or positional arguments. */
-    public static placement(
-        rules: readonly ExecutionArgumentRule[],
-    ): ExecutionInteractiveInvocationRule | null {
-        const selected: ExecutionArgumentRule | undefined = rules.find(
-            (rule: ExecutionArgumentRule): boolean =>
+    public static placement<Integer extends bigint | string>(
+        rules: readonly ExecutionArgumentRule<Integer>[],
+    ): ExecutionInteractiveInvocationRule<Integer> | null {
+        const selected: ExecutionArgumentRule<Integer> | undefined = rules.find(
+            (rule: ExecutionArgumentRule<Integer>): boolean =>
                 rule.kind === ExecutionArgumentKind.InteractiveInvocation,
         );
         if (selected === undefined) {
@@ -48,8 +48,11 @@ export class ExecutionInteractiveRuleCodec {
     }
 
     /** A nested Machine grant retains the profile's independent wall-time ceiling. */
-    public static profile(rules: readonly ExecutionArgumentRule[], timeoutMs: number): void {
-        const rule: ExecutionInteractiveInvocationRule | null = this.placement(rules);
+    public static profile<Integer extends bigint | string>(
+        rules: readonly ExecutionArgumentRule<Integer>[],
+        timeoutMs: number,
+    ): void {
+        const rule: ExecutionInteractiveInvocationRule<Integer> | null = this.placement(rules);
         if (rule !== null && rule.invocation.maximumTimeoutMs > timeoutMs) {
             throw new Error('Interactive timeout exceeds its execution profile');
         }

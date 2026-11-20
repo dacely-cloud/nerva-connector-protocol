@@ -8,7 +8,7 @@ export declare class ExecutionInteractiveRuleCodec {
     /** Trusted projections still detach every field and validate internal integer precision. */
     static body(value: ExecutionInteractiveInvocationRule): ExecutionInteractiveInvocationRule;
     /** A complete interactive grant cannot coexist with foreground or positional arguments. */
-    static placement(rules: readonly ExecutionArgumentRule[]): ExecutionInteractiveInvocationRule | null;
+    static placement<Integer extends bigint | string>(rules: readonly ExecutionArgumentRule<Integer>[]): ExecutionInteractiveInvocationRule<Integer> | null;
     /** A nested Machine grant retains the profile's independent wall-time ceiling. */
-    static profile(rules: readonly ExecutionArgumentRule[], timeoutMs: number): void;
+    static profile<Integer extends bigint | string>(rules: readonly ExecutionArgumentRule<Integer>[], timeoutMs: number): void;
 }

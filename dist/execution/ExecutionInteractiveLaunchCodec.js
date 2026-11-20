@@ -41,7 +41,7 @@ export class ExecutionInteractiveLaunchCodec {
             throw new Error('Interactive transport was not explicitly granted');
         }
         const invocation = ExecutionMachineInvocationCodec.read(rule.invocation, value['invocation']);
-        if (BigInt(Data.bytes(invocation.stdin)) > rule.maximumInputBytes) {
+        if (BigInt(Data.bytes(invocation.stdin)) > BigInt(rule.maximumInputBytes)) {
             throw new Error('Initial input exceeds the complete interactive input grant');
         }
         return Object.freeze({

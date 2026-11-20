@@ -17,8 +17,8 @@ import type { ExecutionInteractiveTransport } from './ExecutionInteractive.js';
 /** One canonical argument commits application input, transport, geometry and the immutable execution deadline. */
 export class ExecutionInteractiveLaunchCodec {
     /** Byte bounds precede parsing; duplicate keys, alternate escaping and alternate ordering are rejected. */
-    public static decode(
-        rule: ExecutionInteractiveInvocationRule,
+    public static decode<Integer extends bigint | string>(
+        rule: ExecutionInteractiveInvocationRule<Integer>,
         json: string,
     ): ExecutionInteractiveLaunch {
         const raw: unknown = Fields.decode(json, ExecutionMachineLimits.payloadBytes);
@@ -30,13 +30,16 @@ export class ExecutionInteractiveLaunchCodec {
     }
 
     /** The same closed validators apply before a controller captures its first signed request. */
-    public static encode(rule: ExecutionInteractiveInvocationRule, raw: unknown): string {
+    public static encode<Integer extends bigint | string>(
+        rule: ExecutionInteractiveInvocationRule<Integer>,
+        raw: unknown,
+    ): string {
         return this.#encode(this.#read(rule, raw, Encoding.Internal));
     }
 
     /** Admission and first launch use trusted time; recovery only follows the captured deadline. */
-    public static admit(
-        rule: ExecutionInteractiveInvocationRule,
+    public static admit<Integer extends bigint | string>(
+        rule: ExecutionInteractiveInvocationRule<Integer>,
         json: string,
         nowMs: bigint,
     ): ExecutionInteractiveLaunch {
@@ -53,8 +56,8 @@ export class ExecutionInteractiveLaunchCodec {
         return launch;
     }
 
-    static #read(
-        rule: ExecutionInteractiveInvocationRule,
+    static #read<Integer extends bigint | string>(
+        rule: ExecutionInteractiveInvocationRule<Integer>,
         raw: unknown,
         encoding: Encoding,
     ): ExecutionInteractiveLaunch {
@@ -72,7 +75,7 @@ export class ExecutionInteractiveLaunchCodec {
         }
         const invocation: ReturnType<typeof ExecutionMachineInvocationCodec.read> =
             ExecutionMachineInvocationCodec.read(rule.invocation, value['invocation']);
-        if (BigInt(Data.bytes(invocation.stdin)) > rule.maximumInputBytes) {
+        if (BigInt(Data.bytes(invocation.stdin)) > BigInt(rule.maximumInputBytes)) {
             throw new Error('Initial input exceeds the complete interactive input grant');
         }
         return Object.freeze({
