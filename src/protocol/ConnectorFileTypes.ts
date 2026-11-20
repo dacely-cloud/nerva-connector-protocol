@@ -26,10 +26,10 @@ export enum ConnectorWriteMode {
 }
 
 /** Metadata preserves exact size and modification time without host inode/owner identifiers. */
-export interface ConnectorFileMetadata {
+export interface ConnectorFileMetadata<Integer extends bigint | string = bigint> {
     readonly kind: ConnectorFileKind.File | ConnectorFileKind.Directory;
-    readonly sizeBytes: bigint;
-    readonly modifiedAtNs: bigint;
+    readonly sizeBytes: Integer;
+    readonly modifiedAtNs: Integer;
     readonly mode: number;
 }
 

@@ -14,12 +14,12 @@ export interface ConnectorIndependentAuthorization {
     readonly kind: ConnectorAuthorizationKind.Independent;
 }
 /** The entire original signed descriptor remains available for independent identity/scope verification after head rotation. */
-export interface ConnectorJointAuthorization {
+export interface ConnectorJointAuthorization<Integer extends bigint | string = bigint> {
     readonly kind: ConnectorAuthorizationKind.Joint;
-    readonly binding: JointWorkspaceDescriptor;
+    readonly binding: JointWorkspaceDescriptor<Integer>;
 }
 /** Structural decoding and logical admission hashing never verify or grant the descriptor's signed authority. */
-export type ConnectorAuthorization = ConnectorIndependentAuthorization | ConnectorJointAuthorization;
+export type ConnectorAuthorization<Integer extends bigint | string = bigint> = ConnectorIndependentAuthorization | ConnectorJointAuthorization<Integer>;
 /** Complete authorization has a separate finite envelope budget without reducing the original request limits. */
 export declare class ConnectorAuthorizationLimits {
     static readonly envelopeBytes: number;

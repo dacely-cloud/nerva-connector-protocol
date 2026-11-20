@@ -24,6 +24,12 @@ build step:
 "nerva-connector-protocol": "https://codeload.github.com/dacely-cloud/nerva-connector-protocol/tar.gz/<commit>"
 ```
 
+Exact quantities (sequences, revisions, byte counts, timestamps) are `bigint`. A type that carries one takes an
+`Integer` parameter that defaults to `bigint`, so the device and backend write `ConnectorHostStatus` while the Nexa
+gateway, whose JSON writes those quantities as decimal strings, uses the same declaration as
+`ConnectorHostStatus<string>`. The gateway contract in nexa-protocol is built from these types and never declares
+them a second time.
+
 ## Develop
 
 ```sh

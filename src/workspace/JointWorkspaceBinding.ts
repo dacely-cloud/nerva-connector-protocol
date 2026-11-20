@@ -23,11 +23,11 @@ export interface JointWorkspaceExecutionJournals {
 }
 
 /** Immutable public metadata binds two separately granted policies without exporting any raw physical identity. */
-export interface JointWorkspaceBinding {
+export interface JointWorkspaceBinding<Integer extends bigint | string = bigint> {
     readonly authorityId: string;
     readonly environmentId: string;
     readonly enrollmentId: string;
-    readonly revision: bigint;
+    readonly revision: Integer;
     readonly filePolicySha256: string;
     readonly executionPolicySha256: string;
     readonly fileRootId: string;
@@ -39,8 +39,8 @@ export interface JointWorkspaceBinding {
 }
 
 /** The signature authenticates the exact immutable body; its presence alone is not publication, activation or execution authority. */
-export interface JointWorkspaceDescriptor {
-    readonly binding: JointWorkspaceBinding;
+export interface JointWorkspaceDescriptor<Integer extends bigint | string = bigint> {
+    readonly binding: JointWorkspaceBinding<Integer>;
     readonly signature: string;
 }
 

@@ -48,9 +48,9 @@ export class ConnectorFileLimits {
     public static readonly removalDepth: number = 32;
 }
 /** Public profile contains aliases and commitments; local absolute paths remain private. */
-export interface ConnectorFileProfile {
+export interface ConnectorFileProfile<Integer extends bigint | string = bigint> {
     readonly mode: ConnectorFileMode;
-    readonly revision: bigint;
+    readonly revision: Integer;
     readonly policySha256: string;
     readonly roots: readonly string[];
     readonly maximumReadBytes: number;
@@ -69,9 +69,11 @@ export interface ConnectorFileDescribe {
 }
 
 /** Offset remains exact until the native boundary. */
-export interface ConnectorFileRead extends ConnectorFileTarget {
+export interface ConnectorFileRead<
+    Integer extends bigint | string = bigint,
+> extends ConnectorFileTarget {
     readonly action: ConnectorFileAction.Read;
-    readonly offset: bigint;
+    readonly offset: Integer;
     readonly limit: number;
 }
 /** Metadata never follows symlinks or opens devices. */
@@ -79,9 +81,11 @@ export interface ConnectorFileStat extends ConnectorFileTarget {
     readonly action: ConnectorFileAction.Stat;
 }
 /** Directory cookies are opaque exact filesystem offsets, not stable snapshot promises. */
-export interface ConnectorFileList extends ConnectorFileTarget {
+export interface ConnectorFileList<
+    Integer extends bigint | string = bigint,
+> extends ConnectorFileTarget {
     readonly action: ConnectorFileAction.List;
-    readonly cursor: bigint;
+    readonly cursor: Integer;
 }
 /** Writes publish a complete bounded private regular file; no append, shell or mode escalation is implied. */
 export interface ConnectorFileWrite extends ConnectorFileTarget {
@@ -110,55 +114,57 @@ export interface ConnectorFileRename extends ConnectorFileTarget {
     readonly mode: ConnectorWriteMode;
 }
 /** Only named locally granted filesystem operations are supported. */
-export type ConnectorFileRequest =
+export type ConnectorFileRequest<Integer extends bigint | string = bigint> =
     | ConnectorFileDescribe
-    | ConnectorFileRead
+    | ConnectorFileRead<Integer>
     | ConnectorFileStat
-    | ConnectorFileList
+    | ConnectorFileList<Integer>
     | ConnectorFileWrite
     | ConnectorFileRemove
     | ConnectorFileMkdir
     | ConnectorFileChmod
     | ConnectorFileRename
-    | ConnectorUploadRequest;
+    | ConnectorUploadRequest<Integer>;
 /** Profile replies expose no local paths or secrets. */
-export interface ConnectorFileDescription extends ConnectorFileDescribe {
-    readonly profile: ConnectorFileProfile;
+export interface ConnectorFileDescription<
+    Integer extends bigint | string = bigint,
+> extends ConnectorFileDescribe {
+    readonly profile: ConnectorFileProfile<Integer>;
 }
 /** A chunk is correlated to the original offset and bounded request. */
-export interface ConnectorFileReadResult {
+export interface ConnectorFileReadResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.Read;
     readonly requestId: string;
-    readonly offset: bigint;
+    readonly offset: Integer;
     readonly dataBase64: string;
-    readonly metadata: ConnectorFileMetadata;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** Metadata has one current strict contract. */
-export interface ConnectorFileStatResult {
+export interface ConnectorFileStatResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.Stat;
     readonly requestId: string;
-    readonly metadata: ConnectorFileMetadata;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** A page's cursor can be reused only as an explicit new request. */
-export interface ConnectorFileListResult {
+export interface ConnectorFileListResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.List;
     readonly requestId: string;
     readonly entries: readonly ConnectorFileEntry[];
-    readonly nextCursor: bigint | null;
-    readonly metadata: ConnectorFileMetadata;
+    readonly nextCursor: Integer | null;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** A successful publication reports the exact request's byte count and the published file's metadata. */
-export interface ConnectorFileWriteResult {
+export interface ConnectorFileWriteResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.Write;
     readonly requestId: string;
-    readonly bytesWritten: bigint;
-    readonly metadata: ConnectorFileMetadata;
+    readonly bytesWritten: Integer;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** Success confirms complete removal within the finite entry budget, including the selected target. */
-export interface ConnectorFileRemoveResult {
+export interface ConnectorFileRemoveResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.Remove;
     readonly requestId: string;
-    readonly entriesRemoved: bigint;
+    readonly entriesRemoved: Integer;
 }
 /** Success confirms directory creation and parent synchronization; later path mutations remain possible. */
 export interface ConnectorFileMkdirResult {
@@ -166,33 +172,33 @@ export interface ConnectorFileMkdirResult {
     readonly requestId: string;
 }
 /** The regular-file metadata must confirm the exact requested private permission mode. */
-export interface ConnectorFileChmodResult {
+export interface ConnectorFileChmodResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.Chmod;
     readonly requestId: string;
-    readonly metadata: ConnectorFileMetadata;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** Destination metadata belongs to the moved regular file; identity races remain indeterminate rather than replayable. */
-export interface ConnectorFileRenameResult {
+export interface ConnectorFileRenameResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.Rename;
     readonly requestId: string;
-    readonly metadata: ConnectorFileMetadata;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** Successful results share the original request identity. */
-export type ConnectorFileOutput =
-    | ConnectorFileDescription
-    | ConnectorFileReadResult
-    | ConnectorFileStatResult
-    | ConnectorFileListResult
-    | ConnectorFileWriteResult
-    | ConnectorFileRemoveResult
+export type ConnectorFileOutput<Integer extends bigint | string = bigint> =
+    | ConnectorFileDescription<Integer>
+    | ConnectorFileReadResult<Integer>
+    | ConnectorFileStatResult<Integer>
+    | ConnectorFileListResult<Integer>
+    | ConnectorFileWriteResult<Integer>
+    | ConnectorFileRemoveResult<Integer>
     | ConnectorFileMkdirResult
-    | ConnectorFileChmodResult
-    | ConnectorFileRenameResult
-    | ConnectorUploadOutput;
+    | ConnectorFileChmodResult<Integer>
+    | ConnectorFileRenameResult<Integer>
+    | ConnectorUploadOutput<Integer>;
 /** Result envelopes do not serialize raw native errors. */
-export interface ConnectorFileSuccess {
+export interface ConnectorFileSuccess<Integer extends bigint | string = bigint> {
     readonly ok: true;
-    readonly result: ConnectorFileOutput;
+    readonly result: ConnectorFileOutput<Integer>;
 }
 /** A denied request cannot include an accidental content payload. */
 export interface ConnectorFileError {
@@ -200,4 +206,5 @@ export interface ConnectorFileError {
     readonly error: ConnectorFileFailure;
 }
 /** Public safe local response contract. */
-export type ConnectorFileResponse = ConnectorFileSuccess | ConnectorFileError;
+export type ConnectorFileResponse<Integer extends bigint | string = bigint> =
+    ConnectorFileSuccess<Integer> | ConnectorFileError;

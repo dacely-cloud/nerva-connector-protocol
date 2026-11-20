@@ -8,8 +8,8 @@ export enum ExecutionWorkspaceAccess {
 }
 
 /** Aggregate controls apply outside the namespace to every descendant, including forked background processes. */
-export interface ExecutionResourceLimits {
-    readonly memoryBytes: bigint;
+export interface ExecutionResourceLimits<Integer extends bigint | string = bigint> {
+    readonly memoryBytes: Integer;
     readonly maximumTasks: number;
     readonly cpuQuotaMicros: number;
 }

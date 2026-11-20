@@ -8,12 +8,12 @@ export interface ExecutionRequest extends ExecutionInvocation {
     readonly requestId: string;
 }
 /** Fixed argument values are private local configuration and are never a public input grant. */
-export type ExecutionInputRule = Exclude<ExecutionArgumentRule, ExecutionLiteralArgument>;
+export type ExecutionInputRule<Integer extends bigint | string = bigint> = Exclude<ExecutionArgumentRule<Integer>, ExecutionLiteralArgument>;
 /** Public grants expose aliases and input rules, never executable paths, fixed private arguments or local state paths. */
-export interface ExecutionProgramGrant {
+export interface ExecutionProgramGrant<Integer extends bigint | string = bigint> {
     readonly id: string;
     readonly rootIds: readonly string[];
-    readonly arguments: readonly ExecutionInputRule[];
+    readonly arguments: readonly ExecutionInputRule<Integer>[];
 }
 /** Workspace mutation is explicit and cannot be inferred from a file scope or an executable name. */
 export interface ExecutionRootGrant {
@@ -21,15 +21,15 @@ export interface ExecutionRootGrant {
     readonly access: ExecutionWorkspaceAccess;
 }
 /** Exact local policy and hard ceilings are independently published under device proof. */
-export interface ExecutionProfile {
-    readonly revision: bigint;
+export interface ExecutionProfile<Integer extends bigint | string = bigint> {
+    readonly revision: Integer;
     readonly policySha256: string;
     readonly roots: readonly ExecutionRootGrant[];
-    readonly programs: readonly ExecutionProgramGrant[];
-    readonly resources: ExecutionResourceLimits;
+    readonly programs: readonly ExecutionProgramGrant<Integer>[];
+    readonly resources: ExecutionResourceLimits<Integer>;
     readonly timeoutMs: number;
-    readonly maximumAddressBytes: bigint;
-    readonly maximumFileBytes: bigint;
+    readonly maximumAddressBytes: Integer;
+    readonly maximumFileBytes: Integer;
 }
 /** Every execution proof binds the locally enrolled environment and current verified device lease. */
 export interface ExecutionBinding {

@@ -51,8 +51,8 @@ export interface ConnectorHostInventoryView {
 }
 
 /** Safe account metadata contains no transport credentials or customer paths. */
-export interface ConnectorInventoryView {
-    readonly enrollment: ConnectorEnrollmentView;
+export interface ConnectorInventoryView<Integer extends bigint | string = bigint> {
+    readonly enrollment: ConnectorEnrollmentView<Integer>;
     readonly presence: ConnectorPresence;
     readonly trust: ConnectorInventoryTrust.CustomerReported;
     readonly specification: SystemSpecification | null;
@@ -65,7 +65,7 @@ export interface ConnectorInventoryView {
     readonly host: ConnectorHostInventoryView | null;
 }
 /** A bounded page avoids one UI request per connector or unbounded metadata amplification. */
-export interface ConnectorInventoryPage {
-    readonly items: readonly ConnectorInventoryView[];
+export interface ConnectorInventoryPage<Integer extends bigint | string = bigint> {
+    readonly items: readonly ConnectorInventoryView<Integer>[];
     readonly next: string | null;
 }

@@ -22,24 +22,24 @@ export interface ConnectorEnrollmentClaim {
 }
 
 /** Permanent revocation dominates acceptance of the same immutable invitation and never deletes identity history. */
-export interface ConnectorEnrollmentRevocation {
-    readonly observedRevision: bigint;
+export interface ConnectorEnrollmentRevocation<Integer extends bigint | string = bigint> {
+    readonly observedRevision: Integer;
 }
 
 /** Public metadata contains neither bootstrap authorization nor infrastructure connection details. */
-export interface ConnectorEnrollmentView {
+export interface ConnectorEnrollmentView<Integer extends bigint | string = bigint> {
     readonly id: string;
     readonly environmentId: string;
     readonly name: string;
     readonly phase: ConnectorEnrollmentPhase;
-    readonly revision: bigint;
-    readonly issuedAtMs: bigint;
-    readonly expiresAtMs: bigint;
-    readonly enrolledAtMs: bigint | null;
-    readonly revokedAtMs: bigint | null;
+    readonly revision: Integer;
+    readonly issuedAtMs: Integer;
+    readonly expiresAtMs: Integer;
+    readonly enrolledAtMs: Integer | null;
+    readonly revokedAtMs: Integer | null;
 }
 
 /** Account management can recover invitation IDs after a caller process loses its local response. */
-export interface ConnectorEnrollmentList {
-    readonly enrollments: readonly ConnectorEnrollmentView[];
+export interface ConnectorEnrollmentList<Integer extends bigint | string = bigint> {
+    readonly enrollments: readonly ConnectorEnrollmentView<Integer>[];
 }

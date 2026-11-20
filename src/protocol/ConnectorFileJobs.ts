@@ -11,7 +11,10 @@ import type {
 } from './ConnectorFiles.js';
 
 /** Remote file dispatch exposes only the existing locally enforced read operations. */
-export type ConnectorFileOperation = Exclude<ConnectorFileRequest, ConnectorFileDescribe>;
+export type ConnectorFileOperation<Integer extends bigint | string = bigint> = Exclude<
+    ConnectorFileRequest<Integer>,
+    ConnectorFileDescribe
+>;
 /** One original dispatch persists through transport replacement; no timeout silently reruns it. */
 export enum ConnectorFileJobPhase {
     Queued = 'queued',
@@ -34,23 +37,23 @@ export interface ConnectorFileSubmission {
     readonly admissionHash: string;
 }
 /** Current signed local grants are separate from recent device authentication. */
-export interface ConnectorFileStatus {
+export interface ConnectorFileStatus<Integer extends bigint | string = bigint> {
     readonly environmentId: string;
-    readonly sequence: bigint;
-    readonly acknowledgedSequence: bigint;
+    readonly sequence: Integer;
+    readonly acknowledgedSequence: Integer;
     readonly online: boolean;
-    readonly profile: ConnectorFileProfile | null;
+    readonly profile: ConnectorFileProfile<Integer> | null;
 }
 /** File content is available only through current account/environment authorization. */
-export interface ConnectorFileJobView {
+export interface ConnectorFileJobView<Integer extends bigint | string = bigint> {
     readonly id: string;
     readonly environmentId: string;
-    readonly sequence: bigint;
+    readonly sequence: Integer;
     readonly phase: ConnectorFileJobPhase;
-    readonly request: ConnectorFileOperation;
-    readonly authorization: ConnectorAuthorization;
+    readonly request: ConnectorFileOperation<Integer>;
+    readonly authorization: ConnectorAuthorization<Integer>;
     readonly admissionHash: string;
-    readonly response: ConnectorFileResponse | null;
+    readonly response: ConnectorFileResponse<Integer> | null;
 }
 /** A profile signature belongs to the current device connection, not a reusable bootstrap token. */
 export interface ConnectorFilePublication {

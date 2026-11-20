@@ -84,18 +84,18 @@ export declare const ConnectorHostJobPhase: {
 /** Allowed values derive from the current runtime mapping. */
 export type ConnectorHostJobPhase = (typeof ConnectorHostJobPhase)[keyof typeof ConnectorHostJobPhase];
 /** Local consent and default task directory are signed under the enrolled device identity. */
-export interface ConnectorHostProfile {
+export interface ConnectorHostProfile<Integer extends bigint | string = bigint> {
     readonly grantId: string;
-    readonly grantRevision: bigint;
+    readonly grantRevision: Integer;
     readonly enabled: boolean;
     readonly platform: ConnectorHostPlatform;
     readonly directory: string;
     readonly tools: readonly ConnectorHostTool[];
 }
 /** Only exact bounded JSON text crosses the transport; the tool runtime validates its operation shape again. */
-export interface ConnectorHostRequest {
+export interface ConnectorHostRequest<Integer extends bigint | string = bigint> {
     readonly grantId: string;
-    readonly grantRevision: bigint;
+    readonly grantRevision: Integer;
     readonly toolName: ConnectorHostTool;
     readonly argumentsJson: string;
 }
@@ -111,20 +111,20 @@ export interface ConnectorHostResponse {
     readonly errorCode: ConnectorHostErrorCode | null;
 }
 /** Sequence counters remain permanent after bounded result compaction. */
-export interface ConnectorHostStatus {
+export interface ConnectorHostStatus<Integer extends bigint | string = bigint> {
     readonly environmentId: string;
-    readonly sequence: bigint;
-    readonly acknowledgedSequence: bigint;
+    readonly sequence: Integer;
+    readonly acknowledgedSequence: Integer;
     readonly online: boolean;
-    readonly profile: ConnectorHostProfile | null;
+    readonly profile: ConnectorHostProfile<Integer> | null;
 }
 /** An account can poll only its original job in its own environment. */
-export interface ConnectorHostJobView {
+export interface ConnectorHostJobView<Integer extends bigint | string = bigint> {
     readonly id: string;
     readonly environmentId: string;
-    readonly sequence: bigint;
+    readonly sequence: Integer;
     readonly phase: ConnectorHostJobPhase;
-    readonly request: ConnectorHostRequest;
+    readonly request: ConnectorHostRequest<Integer>;
     readonly response: ConnectorHostResponse | null;
 }
 /** A live publication binds the persistent host journal and complete consent to the current device lease. */

@@ -23,7 +23,7 @@ export interface ExecutionPathArgument {
     readonly maximumBytes: number;
 }
 /** Programs may interpret their arguments; kernel confinement remains mandatory independently of every rule. */
-export type ExecutionArgumentRule = ExecutionLiteralArgument | ExecutionChoiceArgument | ExecutionTextArgument | ExecutionPathArgument | ExecutionMachineInvocationRule | ExecutionInteractiveInvocationRule;
+export type ExecutionArgumentRule<Integer extends bigint | string = bigint> = ExecutionLiteralArgument | ExecutionChoiceArgument | ExecutionTextArgument | ExecutionPathArgument | ExecutionMachineInvocationRule | ExecutionInteractiveInvocationRule<Integer>;
 /** A clean, immutable runtime contains only locally reviewed tooling and runtime data. */
 export interface ExecutionBinaryPolicy {
     readonly path: string;

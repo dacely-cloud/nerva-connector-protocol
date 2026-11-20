@@ -1,8 +1,8 @@
 /** Account-owned connector guidance never grants filesystem, execution or device authority. */
-export interface ConnectorInstructionsView {
+export interface ConnectorInstructionsView<Integer extends bigint | string = bigint> {
     readonly enrollmentId: string;
     readonly instructions: string;
-    readonly revision: bigint;
+    readonly revision: Integer;
 }
 /** An optimistic update preserves the caller's observed settings revision. Empty text clears guidance. */
 export interface ConnectorInstructionsUpdate {

@@ -7,59 +7,59 @@ export declare class ConnectorUploadLimits {
     static readonly requestBytes: number;
 }
 /** Every step repeats the immutable upload commitment and current policy binding. */
-export interface ConnectorUploadTarget extends ConnectorFileTarget {
+export interface ConnectorUploadTarget<Integer extends bigint | string = bigint> extends ConnectorFileTarget {
     readonly uploadId: string;
     readonly mode: ConnectorWriteMode;
-    readonly sizeBytes: bigint;
+    readonly sizeBytes: Integer;
     readonly sha256: string;
 }
 /** Begin retains one private bounded staging slot without publishing its target. */
-export interface ConnectorUploadBegin extends ConnectorUploadTarget {
+export interface ConnectorUploadBegin<Integer extends bigint | string = bigint> extends ConnectorUploadTarget<Integer> {
     readonly action: ConnectorFileAction.UploadBegin;
 }
 /** An exact offset and nonempty bounded chunk prohibit implicit replay or sparse writes. */
-export interface ConnectorUploadChunk extends ConnectorUploadTarget {
+export interface ConnectorUploadChunk<Integer extends bigint | string = bigint> extends ConnectorUploadTarget<Integer> {
     readonly action: ConnectorFileAction.UploadChunk;
-    readonly offset: bigint;
+    readonly offset: Integer;
     readonly dataBase64: string;
 }
 /** Explicit inspection reports the retained prefix after an uncertain prior operation. */
-export interface ConnectorUploadStatus extends ConnectorUploadTarget {
+export interface ConnectorUploadStatus<Integer extends bigint | string = bigint> extends ConnectorUploadTarget<Integer> {
     readonly action: ConnectorFileAction.UploadStatus;
 }
 /** Commit checks complete length and digest before atomic private-file publication. */
-export interface ConnectorUploadCommit extends ConnectorUploadTarget {
+export interface ConnectorUploadCommit<Integer extends bigint | string = bigint> extends ConnectorUploadTarget<Integer> {
     readonly action: ConnectorFileAction.UploadCommit;
 }
 /** Abort removes only the exact bound private slot. */
-export interface ConnectorUploadAbort extends ConnectorUploadTarget {
+export interface ConnectorUploadAbort<Integer extends bigint | string = bigint> extends ConnectorUploadTarget<Integer> {
     readonly action: ConnectorFileAction.UploadAbort;
 }
 /** All staging operations require both cloud write and local read-write authority. */
-export type ConnectorUploadRequest = ConnectorUploadBegin | ConnectorUploadChunk | ConnectorUploadStatus | ConnectorUploadCommit | ConnectorUploadAbort;
+export type ConnectorUploadRequest<Integer extends bigint | string = bigint> = ConnectorUploadBegin<Integer> | ConnectorUploadChunk<Integer> | ConnectorUploadStatus<Integer> | ConnectorUploadCommit<Integer> | ConnectorUploadAbort<Integer>;
 /** Accepted progress is correlated with the exact upload and bounded declared length. */
-export interface ConnectorUploadProgress {
+export interface ConnectorUploadProgress<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.UploadBegin | ConnectorFileAction.UploadChunk;
     readonly requestId: string;
     readonly uploadId: string;
-    readonly receivedBytes: bigint;
+    readonly receivedBytes: Integer;
 }
 /** Prefix hashes let an explicit caller verify state before choosing its next chunk. */
-export interface ConnectorUploadStatusResult {
+export interface ConnectorUploadStatusResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.UploadStatus;
     readonly requestId: string;
     readonly uploadId: string;
-    readonly receivedBytes: bigint;
+    readonly receivedBytes: Integer;
     readonly sha256: string;
 }
 /** Publication confirms the complete requested digest and private regular-file metadata. */
-export interface ConnectorUploadCommitResult {
+export interface ConnectorUploadCommitResult<Integer extends bigint | string = bigint> {
     readonly action: ConnectorFileAction.UploadCommit;
     readonly requestId: string;
     readonly uploadId: string;
-    readonly bytesWritten: bigint;
+    readonly bytesWritten: Integer;
     readonly sha256: string;
-    readonly metadata: ConnectorFileMetadata;
+    readonly metadata: ConnectorFileMetadata<Integer>;
 }
 /** False means the exact bound upload no longer had retained staging data. */
 export interface ConnectorUploadAbortResult {
@@ -69,4 +69,4 @@ export interface ConnectorUploadAbortResult {
     readonly removed: boolean;
 }
 /** Upload results never expose host paths or private staging identities. */
-export type ConnectorUploadOutput = ConnectorUploadProgress | ConnectorUploadStatusResult | ConnectorUploadCommitResult | ConnectorUploadAbortResult;
+export type ConnectorUploadOutput<Integer extends bigint | string = bigint> = ConnectorUploadProgress<Integer> | ConnectorUploadStatusResult<Integer> | ConnectorUploadCommitResult<Integer> | ConnectorUploadAbortResult;

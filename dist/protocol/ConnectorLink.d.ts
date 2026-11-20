@@ -68,17 +68,17 @@ export interface ConnectorLinkReviewRequest {
     readonly code: string;
 }
 /** Explicit approval captures exactly the machine shown during review. */
-export interface ConnectorLinkReview extends ConnectorLinkReviewRequest {
+export interface ConnectorLinkReview<Integer extends bigint | string = bigint> extends ConnectorLinkReviewRequest {
     readonly linkId: string;
     readonly publicKey: string;
     readonly deviceName: string;
-    readonly expiresAtMs: bigint;
+    readonly expiresAtMs: Integer;
 }
 /** Approval responses echo the captured reviewed identity for strict trusted-controller correlation. */
-export interface ConnectorLinkApproved {
+export interface ConnectorLinkApproved<Integer extends bigint | string = bigint> {
     readonly linkId: string;
     readonly publicKey: string;
-    readonly enrollment: ConnectorEnrollmentView;
+    readonly enrollment: ConnectorEnrollmentView<Integer>;
 }
 /** A stale code or changed device cannot replace the identity the user reviewed. */
 export interface ConnectorLinkApproval extends ConnectorLinkReviewRequest {
