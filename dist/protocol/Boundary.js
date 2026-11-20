@@ -25,6 +25,7 @@ export class Boundary {
         if (typeof value !== 'string' ||
             value.length === 0 ||
             value.length > 256 ||
+            !value.isWellFormed() ||
             value.split('').some((character) => character.charCodeAt(0) < 32)) {
             throw new Error('Invalid text');
         }
