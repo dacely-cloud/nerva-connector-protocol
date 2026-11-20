@@ -108,11 +108,11 @@ export class ExecutionMachineRuleCodec {
     }
 
     /** Structured invocation cannot be mixed with positional literals, omitted or interpreted through an old text rule. */
-    public static placement(
-        rules: readonly ExecutionArgumentRule[],
+    public static placement<Integer extends bigint | string>(
+        rules: readonly ExecutionArgumentRule<Integer>[],
     ): ExecutionMachineInvocationRule | null {
-        const selected: ExecutionArgumentRule | undefined = rules.find(
-            (rule: ExecutionArgumentRule): boolean =>
+        const selected: ExecutionArgumentRule<Integer> | undefined = rules.find(
+            (rule: ExecutionArgumentRule<Integer>): boolean =>
                 rule.kind === ExecutionArgumentKind.MachineInvocation,
         );
         if (selected === undefined) {
