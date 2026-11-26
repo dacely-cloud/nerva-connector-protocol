@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import { ExecutionMachineBoundary as Data } from './ExecutionMachineBoundary.js';
 import { ExecutionMachineInvocationCodec } from './ExecutionMachineInvocationCodec.js';

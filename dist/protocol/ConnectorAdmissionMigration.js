@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** The receiver selects one of the three permanent journals; neither requests nor peers select a free-form channel. */
 export var ConnectorMigrationLane;

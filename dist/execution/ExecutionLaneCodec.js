@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import { ExecutionLane } from './ExecutionLane.js';
 /** Lane admission is shared by foreground and interactive codecs without importing job codecs. */

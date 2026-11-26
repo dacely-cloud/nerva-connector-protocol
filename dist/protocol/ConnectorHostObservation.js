@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** Read-side hints cannot cross native process and terminal handle families. */
 export const ConnectorHostObservationKind = { Process: 'process', Terminal: 'terminal' };

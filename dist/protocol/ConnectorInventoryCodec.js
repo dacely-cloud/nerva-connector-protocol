@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import { ConnectorHostCodec } from './ConnectorHostCodec.js';
 import { ConnectorHostPlatform, ConnectorHostTool } from './ConnectorHost.js';

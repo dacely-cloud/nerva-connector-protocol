@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import { ConnectorDeviceCodec } from './ConnectorDeviceCodec.js';
 import { ExecutionInteractiveFields as Fields, ExecutionInteractiveEncoding as Encoding, } from '../execution/ExecutionInteractiveFields.js';

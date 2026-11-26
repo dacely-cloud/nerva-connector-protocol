@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import { IdentityLengths, SignaturePurpose, SignatureSuite } from './IdentityFormat.js';
 /** Node-only connector and authority codecs validate fixed composite bytes before crypto or allocation. */

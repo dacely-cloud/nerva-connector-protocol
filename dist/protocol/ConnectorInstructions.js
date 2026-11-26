@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** The instruction bound applies to UTF-8 bytes before persistence or prompt construction. */
 export class ConnectorInstructionsLimits {

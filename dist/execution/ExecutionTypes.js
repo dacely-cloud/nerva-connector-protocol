@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** Execution authority is distinct from a file-read grant; this controls persistent workspace mutation. */
 export var ExecutionWorkspaceAccess;

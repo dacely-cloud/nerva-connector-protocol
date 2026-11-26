@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import { ConnectorHostObservationTranscript as Transcript } from './ConnectorHostObservationTranscript.js';
 /** Handshake proof domains cannot be substituted for source permits or native instance readiness. */

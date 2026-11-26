@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** Companion resources cannot borrow primary effect-lane queues, authentication slots or shutdown authority. */
 export const ConnectorHostObservationCapabilityLimits = {

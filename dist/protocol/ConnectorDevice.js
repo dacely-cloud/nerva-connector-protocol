@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** Private edge RPC authenticates a device but never grants execution or declares a tunnel online. */
 export var ConnectorDeviceEndpoint;

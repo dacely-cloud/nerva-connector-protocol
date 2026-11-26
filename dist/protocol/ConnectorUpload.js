@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** One staging slot per captured root uses exact declared lengths; chunking never grants arbitrary append access. */
 export class ConnectorUploadLimits {

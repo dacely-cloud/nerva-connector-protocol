@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Nerva contributors
+// SPDX-FileCopyrightText: 2026 Dacely <business@dacely.com>
 // SPDX-License-Identifier: LicenseRef-Proprietary
 /** Initial bounded enrollment policy; history is never silently expired, reused or deleted to regain quota. */
 export class ConnectorEnrollmentLimits {
