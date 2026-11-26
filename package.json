@@ -30,7 +30,7 @@
         "url": "git+https://github.com/dacely-cloud/nerva-connector-protocol.git"
     },
     "devDependencies": {
-        "@types/node": "26.6.5",
+        "@types/node": "26.6.11",
         "typescript": "7.0.2"
     }
 }
