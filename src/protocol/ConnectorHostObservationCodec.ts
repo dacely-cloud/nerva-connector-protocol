@@ -166,7 +166,7 @@ export class ConnectorHostObservationCodec {
             'changes',
             'signature',
         ]);
-        const changes: readonly Change[] = Data.array(value['changes'], Limits.Entries).map(
+        const changes: readonly Change[] = Data.array(value['changes'], Limits.ChangesPerBatch).map(
             (raw: unknown): Change => {
                 const item: Readonly<Record<string, unknown>> = Data.record(raw, [
                     'observationId',
@@ -218,7 +218,7 @@ export class ConnectorHostObservationCodec {
         ]);
         const changes: readonly AcknowledgedChange[] = Data.array(
             value['changes'],
-            Limits.Entries,
+            Limits.ChangesPerBatch,
         ).map((raw: unknown): AcknowledgedChange => {
             const item: Readonly<Record<string, unknown>> = Data.record(raw, [
                 'observationId',

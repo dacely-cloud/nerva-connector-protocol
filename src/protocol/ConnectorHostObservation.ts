@@ -101,9 +101,15 @@ export interface ConnectorHostObservationAcknowledgment {
     readonly changes: readonly ConnectorHostObservationAcknowledgedChange[];
     readonly signature: string;
 }
-/** Read-side budgets are independent of effect admission and retained binary ring limits. */
+/**
+ * Read-side wire budgets, independent of effect admission and retained binary ring limits.
+ *
+ * @remarks
+ * `ChangesPerBatch` sizes one signed changed or acknowledgment batch so it fits a frame. It is not
+ * a cap on observed sources: a connector with more dirty sources sends them across further batches.
+ */
 export const ConnectorHostObservationLimits = {
-    Entries: 32,
+    ChangesPerBatch: 32,
     FrameBytes: 65536,
     PermitMs: 30000n,
     WaitMs: 25000,

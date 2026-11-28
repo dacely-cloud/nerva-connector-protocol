@@ -148,7 +148,7 @@ export class ConnectorHostObservationCodec {
             'changes',
             'signature',
         ]);
-        const changes = Data.array(value['changes'], Limits.Entries).map((raw) => {
+        const changes = Data.array(value['changes'], Limits.ChangesPerBatch).map((raw) => {
             const item = Data.record(raw, [
                 'observationId',
                 'generation',
@@ -196,7 +196,7 @@ export class ConnectorHostObservationCodec {
             'changes',
             'signature',
         ]);
-        const changes = Data.array(value['changes'], Limits.Entries).map((raw) => {
+        const changes = Data.array(value['changes'], Limits.ChangesPerBatch).map((raw) => {
             const item = Data.record(raw, [
                 'observationId',
                 'generation',
