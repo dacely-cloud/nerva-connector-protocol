@@ -22,7 +22,7 @@
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
         "typecheck": "tsc -p tsconfig.json",
-        "test": "node --test test/Golden.test.ts",
+        "test": "node --test test/Golden.test.ts test/ConnectorHostArguments.test.ts",
         "check": "npm run typecheck && npm run build && git diff --exit-code -- dist && npm test"
     },
     "repository": {

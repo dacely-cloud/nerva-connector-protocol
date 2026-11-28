@@ -30,6 +30,17 @@ gateway, whose JSON writes those quantities as decimal strings, uses the same de
 `ConnectorHostStatus<string>`. The gateway contract in nexa-protocol is built from these types and never declares
 them a second time.
 
+## Host tool arguments
+
+`protocol/ConnectorHostArgumentContract.js` declares the argument object of every native host tool once: field names,
+JSON types (decimal strings for exact quantities), required fields, mutually exclusive modes such as executable with
+arguments versus shell with command, and bounds. `protocol/ConnectorHostArgumentValidation.js` checks arguments against
+them and returns the first violation as a message that names the field and never repeats a supplied value.
+Nerva Connector enforces these contracts on every call, and a client checks them before submitting so a malformed call
+fails at once instead of after a round trip. `protocol/ConnectorHostArgumentShape.js` renders the compact notation a
+model reads (`{path,offset?:"n",maximumBytes?:n}`) and `protocol/ConnectorHostArgumentSchema.js` the JSON Schema for MCP
+discovery.
+
 ## Develop
 
 ```sh
