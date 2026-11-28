@@ -13,7 +13,7 @@ export interface ConnectorHostSchemaObject {
  * Mode groups have no schema form here: every field of every alternative is listed and only the fields required in
  * all cases are marked required, so a schema-only client sees the same flat object it always has. The contract,
  * not the schema, decides what is accepted. Text lengths are advisory, because JSON Schema counts code points where
- * the contract counts UTF-16 code units.
+ * the contract counts UTF-16 code units, and map key rules are left to the contract.
  */
 export declare class ConnectorHostArgumentSchema {
     #private;

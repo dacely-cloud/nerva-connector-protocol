@@ -62,14 +62,6 @@ export class ConnectorHostKeyChord {
         );
     }
 
-    /** Return an accepted expression unchanged, or throw without quoting it. */
-    public static read(key: string, action: ConnectorHostKeyAction): string {
-        if (!this.accepts(key, action)) {
-            throw new Error('Invalid desktop key chord');
-        }
-        return key;
-    }
-
     /** Whether the text names exactly one key, modifiers included. */
     public static single(key: unknown): boolean {
         return (

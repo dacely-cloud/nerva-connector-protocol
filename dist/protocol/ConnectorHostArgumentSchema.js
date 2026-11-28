@@ -9,7 +9,7 @@ import { ConnectorHostArgumentKind as Kind, } from './ConnectorHostArgumentField
  * Mode groups have no schema form here: every field of every alternative is listed and only the fields required in
  * all cases are marked required, so a schema-only client sees the same flat object it always has. The contract,
  * not the schema, decides what is accepted. Text lengths are advisory, because JSON Schema counts code points where
- * the contract counts UTF-16 code units.
+ * the contract counts UTF-16 code units, and map key rules are left to the contract.
  */
 export class ConnectorHostArgumentSchema {
     /** The input schema of one tool; `descriptions` attaches text to named top-level fields. */
@@ -72,15 +72,12 @@ export class ConnectorHostArgumentSchema {
                     maxItems: field.maxItems,
                     ...(field.unique ? { uniqueItems: true } : {}),
                 };
-            case Kind.TextMap: {
-                const names = this.#text(field.key);
+            case Kind.TextMap:
                 return {
                     type: this.#type('object', field.nullable),
-                    ...(Object.keys(names).length > 1 ? { propertyNames: names } : {}),
                     additionalProperties: this.#text(field.value),
                     maxProperties: field.maxEntries,
                 };
-            }
             case Kind.Record:
                 return this.#object(field.fields, field.required, {});
         }
@@ -97,25 +94,12 @@ export class ConnectorHostArgumentSchema {
                 : { pattern: `^[^${this.#characters(field.excludes)}\\u0000]*$` }),
         };
     }
+    /** Escape characters for a regular-expression character class. */
     static #characters(characters) {
-        return Array.from(characters)
-            .map((character) => {
-            switch (character) {
-                case '\\':
-                case ']':
-                case '[':
-                case '^':
-                case '-':
-                    return '\\' + character;
-                case '\r':
-                    return '\\r';
-                case '\n':
-                    return '\\n';
-                default:
-                    return character;
-            }
-        })
-            .join('');
+        return characters
+            .replace(/[\\\]\[^-]/gu, '\\$&')
+            .replace(/\r/gu, '\\r')
+            .replace(/\n/gu, '\\n');
     }
     static #type(type, nullable) {
         return nullable ? [type, 'null'] : type;

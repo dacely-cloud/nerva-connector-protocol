@@ -26,24 +26,15 @@ export class ConnectorHostArguments {
     }
     /** A text or data field. */
     text(name) {
-        const value = this.#value(name);
-        if (typeof value !== 'string') {
-            throw new Error(`Host argument ${name} is not text`);
-        }
-        return value;
+        return this.#read(name, ConnectorHostArguments.#string);
     }
     /** An optional text or data field, or the fallback when it is absent. */
     optionalText(name, fallback) {
         return this.has(name) ? this.text(name) : fallback;
     }
-    /** One value of a choice field, narrowed to the caller's value set. */
+    /** One value of a choice field, narrowed to the caller's value set or value object. */
     choice(name, values) {
-        const value = this.#value(name);
-        const match = values.find((candidate) => candidate === value);
-        if (match === undefined) {
-            throw new Error(`Host argument ${name} is not one of the expected values`);
-        }
-        return match;
+        return this.#read(name, (value) => Object.values(values).some((candidate) => candidate === value));
     }
     /** An optional choice field, or the fallback when it is absent. */
     optionalChoice(name, values, fallback) {
@@ -51,11 +42,7 @@ export class ConnectorHostArguments {
     }
     /** A decimal or signed decimal string field as an exact integer. */
     decimal(name) {
-        const value = this.#value(name);
-        if (typeof value !== 'string') {
-            throw new Error(`Host argument ${name} is not a decimal string`);
-        }
-        return BigInt(value);
+        return BigInt(this.text(name));
     }
     /** An optional decimal string field, or the fallback when it is absent. */
     optionalDecimal(name, fallback) {
@@ -63,11 +50,7 @@ export class ConnectorHostArguments {
     }
     /** A JSON integer field. */
     integer(name) {
-        const value = this.#value(name);
-        if (typeof value !== 'number') {
-            throw new Error(`Host argument ${name} is not an integer`);
-        }
-        return value;
+        return this.#read(name, (value) => typeof value === 'number');
     }
     /** An optional JSON integer field, or the fallback when it is absent. */
     optionalInteger(name, fallback) {
@@ -75,11 +58,7 @@ export class ConnectorHostArguments {
     }
     /** A boolean field. */
     boolean(name) {
-        const value = this.#value(name);
-        if (typeof value !== 'boolean') {
-            throw new Error(`Host argument ${name} is not a boolean`);
-        }
-        return value;
+        return this.#read(name, (value) => typeof value === 'boolean');
     }
     /** An optional boolean field, or the fallback when it is absent. */
     optionalBoolean(name, fallback) {
@@ -87,47 +66,39 @@ export class ConnectorHostArguments {
     }
     /** A string list field, empty when it is absent. */
     list(name) {
-        const value = this.#value(name);
-        if (value === undefined) {
-            return [];
-        }
-        if (!Array.isArray(value)) {
-            throw new Error(`Host argument ${name} is not a list`);
-        }
-        return value.map((item) => {
-            if (typeof item !== 'string') {
-                throw new Error(`Host argument ${name} holds a value that is not text`);
-            }
-            return item;
-        });
+        return this.has(name)
+            ? this.#read(name, (value) => Array.isArray(value) && value.every(ConnectorHostArguments.#string))
+            : [];
     }
     /** A string dictionary field as a fresh copy, empty when it is absent. */
     map(name) {
-        const value = this.#value(name);
-        if (value === undefined) {
-            return {};
-        }
-        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-            throw new Error(`Host argument ${name} is not a map`);
-        }
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => {
-            if (typeof item !== 'string') {
-                throw new Error(`Host argument ${name} holds a value that is not text`);
-            }
-            return [key, item];
-        }));
+        return this.has(name)
+            ? Object.fromEntries(Object.entries(this.#record(name)).map(([key, item]) => [
+                key,
+                this.#read(key, ConnectorHostArguments.#string, item),
+            ]))
+            : {};
     }
     /** A nested record field. */
     record(name) {
-        const value = this.#value(name);
-        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-            throw new Error(`Host argument ${name} is not a record`);
-        }
-        return new ConnectorHostArguments(Object.fromEntries(Object.entries(value)));
+        return new ConnectorHostArguments(Object.fromEntries(Object.entries(this.#record(name))));
     }
     /** An optional nested record field, or null when it is absent. */
     optionalRecord(name) {
         return this.has(name) ? this.record(name) : null;
+    }
+    static #string(value) {
+        return typeof value === 'string';
+    }
+    #record(name) {
+        return this.#read(name, (value) => typeof value === 'object' && value !== null && !Array.isArray(value));
+    }
+    /** Narrow one field, or a value read from it, to the kind the caller expects. */
+    #read(name, guard, value = this.#value(name)) {
+        if (!guard(value)) {
+            throw new Error(`Host argument ${name} is not the kind its contract declares`);
+        }
+        return value;
     }
     #value(name) {
         if (!Object.hasOwn(this.#values, name)) {

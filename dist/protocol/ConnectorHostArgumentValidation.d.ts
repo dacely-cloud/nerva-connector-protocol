@@ -9,8 +9,6 @@ export interface ConnectorHostArgumentAccepted {
 /** The first contract violation found, phrased for the caller that has to correct it. */
 export interface ConnectorHostArgumentRejected {
     readonly valid: false;
-    /** Dotted path of the offending field, or null when the violation concerns the whole object or a field name that is not shown. */
-    readonly field: string | null;
     /** One sentence without a final period that names the field and what it accepts; supplied values are never quoted. */
     readonly message: string;
 }

@@ -20,10 +20,10 @@ export declare class ConnectorHostArguments {
     text(name: string): string;
     /** An optional text or data field, or the fallback when it is absent. */
     optionalText<Fallback extends string | null | undefined>(name: string, fallback: Fallback): string | Fallback;
-    /** One value of a choice field, narrowed to the caller's value set. */
-    choice<Value extends string>(name: string, values: readonly Value[]): Value;
+    /** One value of a choice field, narrowed to the caller's value set or value object. */
+    choice<Value extends string>(name: string, values: Readonly<Record<string, Value>> | readonly Value[]): Value;
     /** An optional choice field, or the fallback when it is absent. */
-    optionalChoice<Value extends string, Fallback extends string | null | undefined>(name: string, values: readonly Value[], fallback: Fallback): Value | Fallback;
+    optionalChoice<Value extends string, Fallback extends string | null | undefined>(name: string, values: Readonly<Record<string, Value>> | readonly Value[], fallback: Fallback): Value | Fallback;
     /** A decimal or signed decimal string field as an exact integer. */
     decimal(name: string): bigint;
     /** An optional decimal string field, or the fallback when it is absent. */

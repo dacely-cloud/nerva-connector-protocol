@@ -51,13 +51,6 @@ export class ConnectorHostKeyChord {
             (parts.length > 1 && this.modifiers.includes(primary)) ||
             !this.single(primary));
     }
-    /** Return an accepted expression unchanged, or throw without quoting it. */
-    static read(key, action) {
-        if (!this.accepts(key, action)) {
-            throw new Error('Invalid desktop key chord');
-        }
-        return key;
-    }
     /** Whether the text names exactly one key, modifiers included. */
     static single(key) {
         return (typeof key === 'string' &&

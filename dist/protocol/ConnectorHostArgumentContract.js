@@ -31,147 +31,151 @@ export class ConnectorHostArgumentContracts {
     static textLength = 196608;
     /** Longest program, argument, environment value or working directory a launch accepts. */
     static nativeTextLength = 32767;
+    /** Paths, identifiers and other required text; one shared declaration keeps the table small in every bundle. */
+    static #nonEmpty = this.#text(1, this.textLength);
+    static #anyText = this.#text(0, this.textLength);
+    static #nativeText = this.#text(1, this.nativeTextLength);
+    static #decimal = {
+        kind: Kind.Decimal,
+        nullable: false,
+    };
+    static #boolean = {
+        kind: Kind.Boolean,
+        nullable: false,
+    };
+    static #payload = {
+        kind: Kind.Data,
+        nullable: false,
+        maxLength: this.textLength,
+    };
+    static #encoding = this.#choice(ConnectorHostByteEncoding);
     /** The contract of one tool under the given transport bounds. */
     static of(tool, bounds) {
+        const chunk = this.#integer(1, bounds.chunkBytes);
         switch (tool) {
             case ConnectorHostTool.ComputerInfo:
             case ConnectorHostTool.DesktopInfo:
             case ConnectorHostTool.DesktopSnapshot:
-                return this.#contract(tool, {}, []);
+                return this.#contract(tool, {});
             case ConnectorHostTool.NetworkResolve:
-                return this.#contract(tool, { hostname: this.#text(1, 253) }, ['hostname']);
+                return this.#contract(tool, { hostname: this.#text(1, 253) });
             case ConnectorHostTool.HttpOpen:
                 return this.#contract(tool, {
                     url: this.#text(1, 16384),
                     address: this.#text(1, 64),
-                    method: this.#choice(Object.values(ConnectorHostHttpMethod)),
+                    method: this.#choice(ConnectorHostHttpMethod),
                     headers: {
                         kind: Kind.TextMap,
                         nullable: false,
-                        key: this.#text(1, this.textLength),
-                        value: this.#text(0, this.textLength),
+                        key: this.#nonEmpty,
+                        value: this.#anyText,
                         maxEntries: 8,
                     },
-                    maximumBytes: { kind: Kind.Decimal, nullable: false },
+                    maximumBytes: this.#decimal,
                     timeoutMs: this.#integer(1000, 900000),
                     idleTimeoutMs: this.#integer(1000, 30000),
-                }, [
-                    'url',
-                    'address',
-                    'method',
-                    'headers',
-                    'maximumBytes',
-                    'timeoutMs',
-                    'idleTimeoutMs',
-                ]);
+                }, []);
             case ConnectorHostTool.HttpRead:
                 return this.#contract(tool, {
-                    transferId: this.#text(1, this.textLength),
-                    offset: { kind: Kind.Decimal, nullable: false },
-                    maximumBytes: this.#integer(1, bounds.chunkBytes),
-                }, ['transferId', 'offset', 'maximumBytes']);
+                    transferId: this.#nonEmpty,
+                    offset: this.#decimal,
+                    maximumBytes: chunk,
+                }, []);
             case ConnectorHostTool.HttpClose:
-                return this.#contract(tool, { transferId: this.#text(1, this.textLength) }, [
-                    'transferId',
-                ]);
+                return this.#contract(tool, { transferId: this.#nonEmpty });
             case ConnectorHostTool.EnvironmentInspect:
                 return this.#contract(tool, {
                     programs: this.#names('/\\', ['.', '..']),
                     variables: this.#names('=', []),
-                }, ['programs', 'variables']);
+                }, []);
             case ConnectorHostTool.FilePublish:
             case ConnectorHostTool.FileRename:
                 return this.#contract(tool, {
-                    source: this.#text(1, this.textLength),
-                    destination: this.#text(1, this.textLength),
-                }, ['source', 'destination']);
+                    source: this.#nonEmpty,
+                    destination: this.#nonEmpty,
+                }, []);
             case ConnectorHostTool.FileChmod:
-                return this.#contract(tool, { path: this.#text(1, this.textLength), mode: this.#integer(0, 0o7777) }, ['path', 'mode']);
+                return this.#contract(tool, { path: this.#nonEmpty, mode: this.#integer(0, 0o7777) }, []);
             case ConnectorHostTool.DesktopScreenshot:
                 return this.#contract(tool, {
-                    path: this.#text(1, this.textLength),
+                    path: this.#nonEmpty,
                     mode: this.#choice([
                         ConnectorHostWriteMode.Create,
                         ConnectorHostWriteMode.Replace,
                     ]),
                     maximumWidth: this.#integer(1, 4096),
                     maximumHeight: this.#integer(1, 4096),
-                }, ['path', 'mode']);
+                }, ['maximumWidth', 'maximumHeight']);
             case ConnectorHostTool.ApplicationOpen:
                 return this.#contract(tool, {
                     name: { ...this.#text(1, 4096), excludes: '\r\n' },
                     url: this.#text(8, 4096),
-                    workspaceFile: this.#text(1, this.textLength),
-                }, ['name'], {
+                    workspaceFile: this.#nonEmpty,
+                }, ['url', 'workspaceFile'], {
                     required: false,
                     alternatives: [
-                        { fields: ['url'], required: ['url'] },
-                        { fields: ['workspaceFile'], required: ['workspaceFile'] },
+                        this.#alternative(['url']),
+                        this.#alternative(['workspaceFile']),
                     ],
                 });
             case ConnectorHostTool.DesktopPointer:
                 return this.#contract(tool, {
                     x: this.#integer(-1000000, 1000000),
                     y: this.#integer(-1000000, 1000000),
-                    action: this.#choice(Object.values(ConnectorHostPointerAction)),
-                    button: {
-                        ...this.#choice(Object.values(ConnectorHostPointerButton)),
-                        nullable: true,
-                    },
+                    action: this.#choice(ConnectorHostPointerAction),
+                    button: this.#nullable(this.#choice(ConnectorHostPointerButton)),
                     image: this.#image(),
-                }, ['x', 'y', 'action']);
+                }, ['button', 'image']);
             case ConnectorHostTool.DesktopKey:
                 return this.#contract(tool, {
                     key: this.#text(1, 64),
-                    action: this.#choice(Object.values(ConnectorHostKeyAction)),
+                    action: this.#choice(ConnectorHostKeyAction),
                     target: this.#text(1, 60),
-                }, ['key', 'action'], null, [ConnectorHostArgumentRule.KeyChord]);
+                }, ['target'], null, [ConnectorHostArgumentRule.KeyChord]);
             case ConnectorHostTool.DesktopText:
                 return this.#contract(tool, {
-                    text: this.#text(0, this.textLength),
+                    text: this.#anyText,
                     target: this.#text(1, 60),
                     field: this.#text(1, 256),
                     replace: { kind: Kind.True, nullable: false },
-                }, ['text'], {
+                }, ['target', 'field', 'replace'], {
                     required: false,
-                    alternatives: [
-                        { fields: ['field', 'replace'], required: ['field', 'replace'] },
-                    ],
+                    alternatives: [this.#alternative(['field', 'replace'])],
                 });
             case ConnectorHostTool.FileRead:
                 return this.#contract(tool, {
-                    path: this.#text(1, this.textLength),
-                    offset: { kind: Kind.Decimal, nullable: false },
-                    maximumBytes: this.#integer(1, bounds.chunkBytes),
+                    path: this.#nonEmpty,
+                    offset: this.#decimal,
+                    maximumBytes: chunk,
                     snapshot: this.#snapshot(),
-                }, ['path']);
+                }, ['offset', 'maximumBytes', 'snapshot']);
             case ConnectorHostTool.FileDigest:
-                return this.#contract(tool, { path: this.#text(1, this.textLength), snapshot: this.#snapshot() }, ['path', 'snapshot']);
+                return this.#contract(tool, { path: this.#nonEmpty, snapshot: this.#snapshot() });
             case ConnectorHostTool.FileWrite:
                 return this.#contract(tool, {
-                    path: this.#text(1, this.textLength),
-                    data: { kind: Kind.Data, nullable: false, maxLength: this.textLength },
-                    encoding: this.#choice(Object.values(ConnectorHostByteEncoding)),
-                    mode: this.#choice(Object.values(ConnectorHostWriteMode)),
-                    offset: { kind: Kind.Decimal, nullable: false },
-                }, ['path', 'data', 'encoding', 'mode'], null, [ConnectorHostArgumentRule.Bytes, ConnectorHostArgumentRule.WriteOffset]);
+                    path: this.#nonEmpty,
+                    data: this.#payload,
+                    encoding: this.#encoding,
+                    mode: this.#choice(ConnectorHostWriteMode),
+                    offset: this.#decimal,
+                }, ['offset'], null, [ConnectorHostArgumentRule.Bytes, ConnectorHostArgumentRule.WriteOffset]);
             case ConnectorHostTool.FileStat:
                 return this.#contract(tool, {
-                    path: this.#text(1, this.textLength),
-                    follow: { kind: Kind.Boolean, nullable: false },
-                }, ['path']);
+                    path: this.#nonEmpty,
+                    follow: this.#boolean,
+                }, ['follow']);
             case ConnectorHostTool.DirectoryList:
                 return this.#contract(tool, {
-                    path: this.#text(1, this.textLength),
+                    path: this.#nonEmpty,
                     offset: this.#integer(0, 1000000),
                     maximumEntries: this.#integer(1, bounds.directoryEntries),
-                }, ['path']);
+                }, ['offset', 'maximumEntries']);
             case ConnectorHostTool.DirectoryCreate:
             case ConnectorHostTool.FileRemove:
                 return this.#contract(tool, {
-                    path: this.#text(1, this.textLength),
-                    recursive: { kind: Kind.Boolean, nullable: false },
-                }, ['path', 'recursive']);
+                    path: this.#nonEmpty,
+                    recursive: this.#boolean,
+                }, []);
             case ConnectorHostTool.ProcessStart:
                 return this.#launch(tool, {});
             case ConnectorHostTool.TerminalStart:
@@ -181,43 +185,41 @@ export class ConnectorHostArgumentContracts {
                 });
             case ConnectorHostTool.ProcessRead:
                 return this.#contract(tool, {
-                    processId: this.#text(1, this.textLength),
-                    stdoutOffset: { kind: Kind.Decimal, nullable: false },
-                    stderrOffset: { kind: Kind.Decimal, nullable: false },
-                    maximumBytes: this.#integer(1, bounds.chunkBytes),
-                }, ['processId']);
+                    processId: this.#nonEmpty,
+                    stdoutOffset: this.#decimal,
+                    stderrOffset: this.#decimal,
+                    maximumBytes: chunk,
+                }, ['stdoutOffset', 'stderrOffset', 'maximumBytes']);
             case ConnectorHostTool.ProcessWrite:
                 return this.#contract(tool, {
-                    processId: this.#text(1, this.textLength),
-                    data: { kind: Kind.Data, nullable: false, maxLength: this.textLength },
-                    encoding: this.#choice(Object.values(ConnectorHostByteEncoding)),
-                    end: { kind: Kind.Boolean, nullable: false },
-                }, ['processId', 'data', 'encoding', 'end'], null, [ConnectorHostArgumentRule.Bytes]);
+                    processId: this.#nonEmpty,
+                    data: this.#payload,
+                    encoding: this.#encoding,
+                    end: this.#boolean,
+                }, [], null, [ConnectorHostArgumentRule.Bytes]);
             case ConnectorHostTool.TerminalRead:
                 return this.#contract(tool, {
-                    processId: this.#text(1, this.textLength),
-                    offset: { kind: Kind.Decimal, nullable: false },
-                    maximumBytes: this.#integer(1, bounds.chunkBytes),
-                }, ['processId']);
+                    processId: this.#nonEmpty,
+                    offset: this.#decimal,
+                    maximumBytes: chunk,
+                }, ['offset', 'maximumBytes']);
             case ConnectorHostTool.TerminalWrite:
                 return this.#contract(tool, {
-                    processId: this.#text(1, this.textLength),
-                    data: { kind: Kind.Data, nullable: false, maxLength: this.textLength },
-                    encoding: this.#choice(Object.values(ConnectorHostByteEncoding)),
-                }, ['processId', 'data', 'encoding'], null, [ConnectorHostArgumentRule.Bytes]);
+                    processId: this.#nonEmpty,
+                    data: this.#payload,
+                    encoding: this.#encoding,
+                }, [], null, [ConnectorHostArgumentRule.Bytes]);
             case ConnectorHostTool.TerminalResize:
                 return this.#contract(tool, {
-                    processId: this.#text(1, this.textLength),
+                    processId: this.#nonEmpty,
                     cols: this.#integer(2, 500),
                     rows: this.#integer(1, 200),
-                }, ['processId', 'cols', 'rows']);
+                }, []);
             case ConnectorHostTool.ProcessStop:
             case ConnectorHostTool.ProcessRelease:
             case ConnectorHostTool.TerminalStop:
             case ConnectorHostTool.TerminalRelease:
-                return this.#contract(tool, { processId: this.#text(1, this.textLength) }, [
-                    'processId',
-                ]);
+                return this.#contract(tool, { processId: this.#nonEmpty });
             default:
                 throw new Error('Unknown host tool');
         }
@@ -231,7 +233,7 @@ export class ConnectorHostArgumentContracts {
      */
     static #launch(tool, extra) {
         return this.#contract(tool, {
-            executable: { ...this.#text(1, this.nativeTextLength), nullable: true },
+            executable: this.#nullable(this.#nativeText),
             arguments: {
                 kind: Kind.TextList,
                 nullable: true,
@@ -239,9 +241,9 @@ export class ConnectorHostArgumentContracts {
                 maxItems: 256,
                 unique: false,
             },
-            shell: { ...this.#choice(Object.values(ConnectorHostShell)), nullable: true },
-            command: { ...this.#text(1, this.textLength), nullable: true },
-            directory: { ...this.#text(1, this.nativeTextLength), nullable: true },
+            shell: this.#nullable(this.#choice(ConnectorHostShell)),
+            command: this.#nullable(this.#nonEmpty),
+            directory: this.#nullable(this.#nativeText),
             environment: {
                 kind: Kind.TextMap,
                 nullable: true,
@@ -252,42 +254,44 @@ export class ConnectorHostArgumentContracts {
             timeoutMs: this.#integer(1, 604800000),
             retentionAfterTimeoutMs: this.#integer(1000, 86400000),
             ...extra,
-        }, ['timeoutMs', ...Object.keys(extra)], {
+        }, [
+            'executable',
+            'arguments',
+            'shell',
+            'command',
+            'directory',
+            'environment',
+            'retentionAfterTimeoutMs',
+        ], {
             required: true,
             alternatives: [
-                { fields: ['executable', 'arguments'], required: ['executable'] },
-                { fields: ['shell', 'command'], required: ['shell', 'command'] },
+                this.#alternative(['executable', 'arguments'], ['executable']),
+                this.#alternative(['shell', 'command']),
             ],
         });
     }
     /** Snapshot preconditions name an opened file's identity, exact size and modification time. */
     static #snapshot() {
-        return {
-            kind: Kind.Record,
-            nullable: false,
-            fields: {
-                identity: this.#text(1, 256),
-                size: { kind: Kind.Decimal, nullable: false },
-                modifiedAtNs: { kind: Kind.SignedDecimal, nullable: false, maxLength: 40 },
-            },
-            required: ['identity', 'size', 'modifiedAtNs'],
-        };
+        return this.#record({
+            identity: this.#text(1, 256),
+            size: this.#decimal,
+            modifiedAtNs: { kind: Kind.SignedDecimal, nullable: false, maxLength: 40 },
+        });
     }
     /** Screenshot geometry maps image pixels to the physical desktop the image depicts. */
     static #image() {
-        return {
-            kind: Kind.Record,
-            nullable: false,
-            fields: {
-                width: this.#integer(1, 4096),
-                height: this.#integer(1, 4096),
-                sourceX: this.#integer(-65535, 65535),
-                sourceY: this.#integer(-65535, 65535),
-                sourceWidth: this.#integer(1, 65535),
-                sourceHeight: this.#integer(1, 65535),
-            },
-            required: ['width', 'height', 'sourceX', 'sourceY', 'sourceWidth', 'sourceHeight'],
-        };
+        return this.#record({
+            width: this.#integer(1, 4096),
+            height: this.#integer(1, 4096),
+            sourceX: this.#integer(-65535, 65535),
+            sourceY: this.#integer(-65535, 65535),
+            sourceWidth: this.#integer(1, 65535),
+            sourceHeight: this.#integer(1, 65535),
+        });
+    }
+    /** A nested object whose fields are all required. */
+    static #record(fields) {
+        return { kind: Kind.Record, nullable: false, fields, required: Object.keys(fields) };
     }
     /** Bare program or variable names: unique, well-formed and at most 255 code points each. */
     static #names(excludes, reserved) {
@@ -298,6 +302,14 @@ export class ConnectorHostArgumentContracts {
             maxItems: 256,
             unique: true,
         };
+    }
+    /** One mode alternative; unless stated otherwise it requires every field that selects it. */
+    static #alternative(fields, required = fields) {
+        return { fields, required };
+    }
+    /** The same field with `null` read as absent. */
+    static #nullable(field) {
+        return { ...field, nullable: true };
     }
     static #text(minLength, maxLength) {
         return {
@@ -314,9 +326,16 @@ export class ConnectorHostArgumentContracts {
         return { kind: Kind.Integer, nullable: false, minimum, maximum };
     }
     static #choice(values) {
-        return { kind: Kind.Choice, nullable: false, values };
+        return { kind: Kind.Choice, nullable: false, values: Object.values(values) };
     }
-    static #contract(tool, fields, required, modes = null, rules = []) {
-        return { tool, fields, required, modes, rules };
+    /** Every field is required unless it is named in `optional`. */
+    static #contract(tool, fields, optional = [], modes = null, rules = []) {
+        return {
+            tool,
+            fields,
+            required: Object.keys(fields).filter((name) => !optional.includes(name)),
+            modes,
+            rules,
+        };
     }
 }

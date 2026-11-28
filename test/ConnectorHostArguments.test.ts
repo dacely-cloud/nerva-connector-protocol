@@ -189,6 +189,21 @@ const cases: readonly ArgumentCase[] = [
     },
     {
         tool: ConnectorHostTool.FileWrite,
+        arguments: { path: 'a', data: 'QUJ=', encoding: 'base64', mode: 'create' },
+        rejection: 'data must be canonical padded base64 when encoding is base64',
+    },
+    {
+        tool: ConnectorHostTool.FileWrite,
+        arguments: { path: 'a', data: 'QQ==QQ==', encoding: 'base64', mode: 'create' },
+        rejection: 'data must be canonical padded base64 when encoding is base64',
+    },
+    {
+        tool: ConnectorHostTool.FileWrite,
+        arguments: { path: 'a', data: 'QUJD/+8w', encoding: 'base64', mode: 'create' },
+        rejection: null,
+    },
+    {
+        tool: ConnectorHostTool.FileWrite,
         arguments: { path: 'a', data: 'QQ', encoding: 'base64', mode: 'create' },
         rejection: 'data must be canonical padded base64 when encoding is base64',
     },
@@ -220,7 +235,7 @@ const cases: readonly ArgumentCase[] = [
     {
         tool: ConnectorHostTool.DesktopKey,
         arguments: { key: 'ctrl+l', action: 'press' },
-        rejection: `key must be one key: a letter or digit, F1 to F12, Enter, Tab, Escape, Backspace, Delete, Insert, Home, End, PageUp, PageDown, Up, Down, Left, Right, Space, Control, Alt, Shift, Meta; with action press it may be distinct Control, Alt, Shift, Meta modifiers joined by + before one other key, such as Control+l`,
+        rejection: `key must be a letter, a digit, F1 to F12 or one of Enter, Tab, Escape, Backspace, Delete, Insert, Home, End, PageUp, PageDown, Up, Down, Left, Right, Space, Control, Alt, Shift, Meta; for action press, distinct Control, Alt, Shift, Meta modifiers may precede it joined by +, such as Control+l`,
     },
     {
         tool: ConnectorHostTool.DesktopKey,
@@ -368,7 +383,7 @@ test('the schema keeps the bounds a schema-only client has always seen', (): voi
 });
 
 test('key chords follow the closed grammar', (): void => {
-    assert.equal(ConnectorHostKeyChord.read('Control+l', 'press'), 'Control+l');
+    assert.equal(ConnectorHostKeyChord.accepts('Control+l', 'press'), true);
     assert.equal(ConnectorHostKeyChord.accepts('Control+l', 'down'), false);
     assert.equal(ConnectorHostKeyChord.accepts('Control+Control+l', 'press'), false);
     assert.equal(ConnectorHostKeyChord.accepts('Control+Shift', 'press'), false);

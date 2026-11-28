@@ -1,4 +1,3 @@
-import { ConnectorHostKeyAction } from './ConnectorHostArgumentChoices.js';
 /**
  * Desktop key expressions are a closed bounded chord grammar, never a shell or keyboard macro language.
  *
@@ -15,8 +14,6 @@ export declare class ConnectorHostKeyChord {
     static readonly named: readonly string[];
     /** Whether the expression is one key or, for `press`, a chord of distinct modifiers before one key. */
     static accepts(key: unknown, action: unknown): boolean;
-    /** Return an accepted expression unchanged, or throw without quoting it. */
-    static read(key: string, action: ConnectorHostKeyAction): string;
     /** Whether the text names exactly one key, modifiers included. */
     static single(key: unknown): boolean;
 }
